@@ -25,11 +25,111 @@ namespace sylar
         }
     }
 
+    LogEventWrap::LogEventWrap(LogEvent::ptr e) : m_event(e) 
+    {
+    }
+
+    LogEventWrap::~LogEventWrap()
+    {
+        m_event->getLogger()->log(m_event->getLevel(),)
+    }
+
+    void LogEvent::format(const char* fmt, ...)
+
+    void LogEvent::format(const char* fmt, va_list al)
+
+    LogEvent::LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level
+                ,const char* file, int32_t line, uint32_t elapse
+                , uint32_t thread_id, uint32_t fiber_id, uint64_t time)
+        :m_file(file),
+        m_line(line),
+        m_elapse(elapse),
+        m_threadId(thread_id),
+        m_fiberId(fiber_id),
+        m_time(time),
+        m_logger(logger),
+        m_level(level)
+    {
+    }
     // static std::map<std::string, std::function<For
+
+    Logger::Logger(const std::string& name)
+        :m_name(name),
+        m_level(LogLevel::DEBUG)
+    {
+        m_formatter.reset(new LogFormatter("%d{%Y-%m-%d %H:%M:%S}%T%t%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"));
+    }
+
+    void Logger::log(LogLevel::Level level, LogEvent::ptr event)
+    {
+        if (level >= m_level)
+        {
+            auto self = shared_from_this();
+            for (auto& i : m_appenders)
+            {
+                i->log(self, level, event);
+            }
+        }
+    }
+
+    void Logger::debug(LogEvent::ptr event)
+    {
+        log(LogLevel::DEBUG, event);
+    }
+
+    void Logger::info(LogEvent::ptr event)
+    {
+        log(LogLevel::INFO, event);
+    }
+
+    void Logger::warm(LogEvent::ptr event)
+    {
+        log(LogLevel::WARN, event);
+    }
+
+    void Logger::error(LogEvent::ptr event)
+    {
+        log(LogLevel::ERROR, event);
+    }
+
+    void Logger::fatal(LogEvent::ptr event)
+    {
+        log(LogLevel::FATAL, event);
+    }
+
+    void Logger::addAppender(LogAppender::ptr appender)
+    {
+        if (!appender->getFormatter())
+        {
+            appender->setFormatter(m_formatter);
+        }
+    }
+
+    void Logger::delAppender(LogAppender::ptr appender)
+    {
+        for (auto it = m_appenders.begin(); it != m_appenders.end(); ++it)
+        {
+            if (*it == appender)
+            {
+                m_appenders.erase(it);
+                break;
+            }
+        }
+    }
+
 
     LogFormatter::LogFormatter(const std::string& pattern):m_pattern(pattern)
     {
         init();
+    }
+
+    std::string LogFormatter::format(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event)
+    {
+        std::stringstream ss;
+        for (auto& i : m_items)
+        {
+            i->format(ss, logger, level, event);
+        }
     }
 
     //%xxx %xxx{xxx} %%
@@ -132,4 +232,35 @@ namespace sylar
         }
     }
 
+    void StdoutLogAppender::log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event)
+    {
+        if (level >= m_level) {
+            std::cout << m_formatter->format(logger, level, event);
+    }
+
+    FileLogAppender::FileLogAppender(const std::string& filename) : m_filename(filename)
+    {
+        reopen();
+    }
+
+    void FileLogAppender::log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event)
+    {
+        if (level >= m_level)
+        {
+            m_filestream << m_formatter->format(logger, level, event);
+        }
+    }
+
+    bool FileLogAppender::reopen()
+    {
+        if (m_filestream) 
+        {
+            m_filestream.close();
+        }
+        m_filestream.open(m_filename, std::ios::app);
+        return !!m_filestream;
+    }
+
 }
+
+

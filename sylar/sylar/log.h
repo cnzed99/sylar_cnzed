@@ -35,7 +35,7 @@ namespace sylar
     //日志事件
     class LogEvent
     {
-        public:
+    public:
         typedef std::shared_ptr<LogEvent> ptr;
         LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level,
                  const char* file, int32_t m_line, uint32_t elapse,
@@ -51,7 +51,11 @@ namespace sylar
         std::shared_ptr<Logger> getLogger() const { return m_logger;}
         LogLevel::Level getLevel() const { return m_level;}
 
-        private:
+        std::stringstream& getSS() { return m_ss; }
+        void format(const char* fmt, ...);
+        void format(const char* fmt, va_list al);
+
+    private:
         const char* m_file = nullptr;   //文件名
         int32_t m_line = 0;             //行号
         uint32_t m_elapse = 0;          //程序启动开始到现在的毫秒数
@@ -62,6 +66,16 @@ namespace sylar
 
         std::shared_ptr<Logger> m_logger;
         LogLevel::Level m_level;
+    };
+
+    class LogEventWrap {
+    public:
+        LogEventWrap(LogEvent::ptr e);
+        ~LogEventWrap();
+        LogEvent::ptr getEvent() const { return m_event; }
+        std::stringstream& getSS();
+    private:
+        LogEvent::ptr m_event;
     };
 
     //日志格式器
@@ -90,20 +104,69 @@ namespace sylar
     //日志输出位置
     class LogAppender
     {
-        public:
+    public:
         typedef std::shared_ptr<LogAppender> ptr;
         virtual ~LogAppender() {}
 
         virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) = 0;
 
-        void setFormatter(LogFormatter::ptr val) ()
+        void setFormatter(LogFormatter::ptr val) (m_formatter = val;)
+        LogFormatter::ptr getFormatter() const { return m_formatter; }
 
-        protected:
+        void setLevel(LogLevel::Level val) { m_level = val; }
+        LogLevel::Level getLevel() const { return m_level; }
+
+    protected:
         LogLevel::Level m_level = LogLevel::DEBUG;
-        LOGFormatter::ptr m_formatter;
+        LogFormatter::ptr m_formatter;
     };
 
+    //日志器
+    class Logger : public std::enable_shared_from_this<Logger>
+    {
+    public:
+        typedef std::shared_ptr<Logger> ptr;
 
+        Logger(const std::string& name = "root");
+        void log(LogLevel::Level level, LogEvent::ptr event);
+
+        void debug(LogEvent::ptr event);
+        void info(LogEvent::ptr event);
+        void warm(LogEvent::ptr event);
+        void error(LogEvent::ptr event);
+        void fatal(LogEvent::ptr event);
+
+        void addAppender(LogAppender::ptr appender);
+        void delAppender(LogAppender::ptr appender);
+
+    private:
+        std::string m_name;                     //日志名称
+        LogLevel::Level m_level;                //日志级别
+        std::list<LogAppender::ptr> m_appenders; //Appender集合
+        LogFormatter::ptr m_formatter;
+    };
+
+    //输出到控制台的Appender
+    class StdoutLogAppender : public LogAppender {
+    public:
+        typedef std::shared_ptr<StdoutLogAppender> ptr;
+        void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override;
+    };
+
+    //定义输出到文件的Appender
+    class FileLogAppender : public LogAppender
+    {
+    public:
+        typedef std::shared_ptr<FileLogAppender> ptr;
+        FileLogAppender(const std::string& filename);
+        void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override;
+
+        //重新打开文件，文件打开成功返回true
+        bool reopen();
+    private:
+        std::string m_filename;
+        std::ofstream m_filestream;
+    };
 
 
 } // namespace sylar
