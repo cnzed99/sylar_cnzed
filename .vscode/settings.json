@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "iosfwd": "cpp",
+        "functional": "cpp",
+        "memory": "cpp"
+    }
+    "window.zoomLevel": -0.4,  // 添加新的设置
+    "cmake.sourceDirectory": "${workspaceFolder}/sylar",
+    "cmake.buildDirectory": "${workspaceFolder}/sylar/build"
+}

@@ -34,6 +34,12 @@ namespace sylar
             static T v;
             return &v;
         }
+
+        static T* GetInstance() 
+        {
+            static T v;
+            return &v;
+        }
     };
 
     /**

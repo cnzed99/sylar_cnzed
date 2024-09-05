@@ -12,6 +12,32 @@
 #include "util.h"
 #include "singleton.h"
 
+#define SYLAR_LOG_LEVEL(logger, level) \
+    if(logger->getLevel() <= level) \
+        sylar::LogEventWrap(sylar::LogEvent::ptr(new sylar::LogEvent(logger, level, \
+                            __FILE__, __LINE__, 0, sylar::GetThreadId(), \
+                            sylar::GetFiberId(), time(0)))).getSS()
+
+#define SYLAR_LOG_DEBUG(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::DEBUG)
+#define SYLAR_LOG_INFO(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::INFO)
+#define SYLAR_LOG_WARN(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::WARN)
+#define SYLAR_LOG_ERROR(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::ERROR)
+#define SYLAR_LOG_FATAL(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::FATAL)
+
+#define SYLAR_LOG_FMT_LEVEL(logger, level, fmt, ...) \
+    if(logger->getLevel() <= level) \
+        sylar::LogEventWrap(sylar::LogEvent::ptr(new sylar::LogEvent(logger, level, \
+                            __FILE__, __LINE__, 0, sylar::GetThreadId(),\
+                            sylar::GetFiberId(), time(0)))).getEvent()->format(fmt, __VA_ARGS__)
+
+#define SYLAR_LOG_FMT_DEBUG(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::DEBUG, fmt, __VA_ARGS__)
+#define SYLAR_LOG_FMT_INFO(logger, fmt, ...)  SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::INFO, fmt, __VA_ARGS__)
+#define SYLAR_LOG_FMT_WARN(logger, fmt, ...)  SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::WARN, fmt, __VA_ARGS__)
+#define SYLAR_LOG_FMT_ERROR(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::ERROR, fmt, __VA_ARGS__)
+#define SYLAR_LOG_FMT_FATAL(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::FATAL, fmt, __VA_ARGS__)
+
+#define SYLAR_LOG_ROOT() sylar::LoggerMgr::GetInstance()->getRoot()
+
 namespace sylar
 {
     class Logger;
@@ -110,7 +136,7 @@ namespace sylar
 
         virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) = 0;
 
-        void setFormatter(LogFormatter::ptr val) (m_formatter = val;)
+        void setFormatter(LogFormatter::ptr val) {m_formatter = val;}
         LogFormatter::ptr getFormatter() const { return m_formatter; }
 
         void setLevel(LogLevel::Level val) { m_level = val; }
@@ -138,6 +164,11 @@ namespace sylar
 
         void addAppender(LogAppender::ptr appender);
         void delAppender(LogAppender::ptr appender);
+
+        LogLevel::Level getLevel() const { return m_level;}
+        void setLevel(LogLevel::Level val) { m_level = val;}
+
+        const std::string& getName() const {return m_name;}
 
     private:
         std::string m_name;                     //日志名称
@@ -168,5 +199,20 @@ namespace sylar
         std::ofstream m_filestream;
     };
 
+    class LoggerManager
+    {
+        public:
+        LoggerManager();
+        Logger::ptr getLogger(const std::string& name);
+        
+        void init();
+        Logger::ptr getRoot() const {return m_root;}
+
+        private:
+        std::map<std::string, Logger::ptr> m_loggers;
+        Logger::ptr m_root;
+    };
+
+    typedef sylar::Singleton<LoggerManager> LoggerMgr;
 
 } // namespace sylar
