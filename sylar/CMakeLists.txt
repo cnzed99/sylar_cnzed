@@ -26,6 +26,8 @@ message("*** ${YAMLCPP}")
 # 定义库的源文件列表
 set(LIB_SRC
     sylar/log.cc
+    sylar/util.cc
+    sylar/config.cc
 )
 
 # 创建共享库sylar，包含上面定义的源文件
@@ -37,8 +39,10 @@ add_executable(test tests/test.cc)
 # 设置test依赖于sylar库
 add_dependencies(test sylar_cnzed)
 
-# 链接test可执行文件与sylar库和yaml-cpp库
-target_link_libraries(test sylar_cnzed ${YAMLCPP})
+add_executable(test_config tests/test_config.cc)
+add_dependencies(test_config sylar_cnzed)
+# 链接test_config可执行文件与sylar库和yaml-cpp库
+target_link_libraries(test_config sylar_cnzed ${YAMLCPP})
 
 # 创建可执行文件testlog，源文件为tests/teslog.cc
 add_executable(testlog tests/testlog.cc)

@@ -6,7 +6,7 @@
             "name": "C++ Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/sylar/bin/testlog", // 替换为你的可执行文件路径
+            "program": "${workspaceFolder}/sylar/bin/test_config", // 替换为你的可执行文件路径
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

@@ -9,6 +9,6 @@
 
 namespace sylar
 {
-    pid_t GetThreadId() { return syscall(SYS_gettid);}
-    uint32_t GetFiberId() { return 0;}
+    pid_t GetThreadId();
+    uint32_t GetFiberId();
 } // namespace sylar

@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+html/*.*
+html
+build
+.vscode
+latex
+sylar/bin/*.txt
+sylar/bin/test
+sylar/bin/test_config
+sylar/bin/testlog
