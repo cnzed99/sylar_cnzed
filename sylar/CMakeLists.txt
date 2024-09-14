@@ -19,7 +19,7 @@ include_directories(/apps/bread/include)
 link_directories(/apps/bread/lib)
 
 # 查找yaml-cpp库并将结果存储在YAMLCPP变量中
-find_library(YAMLCPP yaml-cpp)
+find_library(YAML_CPP yaml-cpp)
 # 输出找到的yaml-cpp库路径
 message("*** ${YAMLCPP}")
 
