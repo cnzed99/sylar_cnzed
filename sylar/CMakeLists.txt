@@ -20,6 +20,7 @@ link_directories(/apps/bread/lib)
 
 # 查找yaml-cpp库并将结果存储在YAMLCPP变量中
 find_library(YAML_CPP yaml-cpp)
+find_library(PTHREAD pthread)
 # 输出找到的yaml-cpp库路径
 message("*** ${YAMLCPP}")
 
@@ -28,10 +29,18 @@ set(LIB_SRC
     sylar/log.cc
     sylar/util.cc
     sylar/config.cc
+    sylar/thread.cc
 )
 
 # 创建共享库sylar，包含上面定义的源文件
 add_library(sylar_cnzed SHARED ${LIB_SRC})
+
+set(LIBS
+        sylar_cnzed
+        pthread
+        yaml-cpp)
+        
+message("***", ${LIBS})
 
 # 创建可执行文件test，源文件为tests/test.cc
 add_executable(test tests/test.cc)
@@ -42,7 +51,7 @@ add_dependencies(test sylar_cnzed)
 add_executable(test_config tests/test_config.cc)
 add_dependencies(test_config sylar_cnzed)
 # 链接test_config可执行文件与sylar库和yaml-cpp库
-target_link_libraries(test_config sylar_cnzed ${YAMLCPP})
+target_link_libraries(test_config sylar_cnzed ${LIBS})
 
 # 创建可执行文件testlog，源文件为tests/teslog.cc
 add_executable(testlog tests/testlog.cc)
@@ -51,7 +60,11 @@ add_executable(testlog tests/testlog.cc)
 add_dependencies(testlog sylar_cnzed)
 
 # 链接testlog可执行文件与sylar库和yaml-cpp库
-target_link_libraries(testlog sylar_cnzed ${YAMLCPP})
+target_link_libraries(testlog sylar_cnzed ${LIBS})
+
+add_executable(test_thread tests/test_thread.cc)
+add_dependencies(test_thread sylar_cnzed)
+target_link_libraries(test_thread ${LIBS})
 
 
 # 设置所有可执行文件的输出路径
