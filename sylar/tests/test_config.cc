@@ -55,7 +55,7 @@ void print_yaml(const YAML::Node& node, int level) {
 }
 
 void test_yaml() {
-    YAML::Node root = YAML::LoadFile("/home/cnzed/Desktop/sylar_cnzed/sylar/bin/conf/log.yml");
+    YAML::Node root = YAML::LoadFile("/home/sylar/workspace/sylar/bin/conf/log.yml");
     //print_yaml(root, 0);
     //SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << root.Scalar();
 
@@ -65,8 +65,6 @@ void test_yaml() {
 }
 
 void test_config() {
-    YAML::Node root = YAML::LoadFile("/home/cnzed/Desktop/sylar_cnzed/sylar/bin/conf/log.yml");
-
     SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "before: " << g_int_value_config->getValue();
     SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "before: " << g_float_value_config->toString();
 
@@ -97,8 +95,8 @@ void test_config() {
     XX_M(g_str_int_map_value_config, str_int_map, before);
     XX_M(g_str_int_umap_value_config, str_int_umap, before);
 
-    YAML::Node root2 = YAML::LoadFile("/home/cnzed/Desktop/sylar_cnzed/sylar/bin/conf/test.yml");
-    sylar::Config::LoadFromYaml(root2);
+    YAML::Node root = YAML::LoadFile("/home/sylar/workspace/sylar/bin/conf/test.yml");
+    sylar::Config::LoadFromYaml(root);
 
     SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "after: " << g_int_value_config->getValue();
     SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "after: " << g_float_value_config->toString();
@@ -177,8 +175,7 @@ sylar::ConfigVar<std::map<std::string, std::vector<Person> > >::ptr g_person_vec
     sylar::Config::Lookup("class.vec_map", std::map<std::string, std::vector<Person> >(), "system person");
 
 void test_class() {
-    YAML::Node root = YAML::LoadFile("/home/cnzed/Desktop/sylar_cnzed/sylar/bin/conf/log.yml");
-     SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "before: " << g_person->getValue().toString() << " - " << g_person->toString();
+    SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "before: " << g_person->getValue().toString() << " - " << g_person->toString();
 
 #define XX_PM(g_var, prefix) \
     { \
@@ -189,7 +186,7 @@ void test_class() {
         SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) <<  prefix << ": size=" << m.size(); \
     }
 
-    g_person->addListener(10, [](const Person& old_value, const Person& new_value){
+    g_person->addListener([](const Person& old_value, const Person& new_value){
         SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "old_value=" << old_value.toString()
                 << " new_value=" << new_value.toString();
     });
@@ -197,8 +194,8 @@ void test_class() {
     XX_PM(g_person_map, "class.map before");
     SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "before: " << g_person_vec_map->toString();
 
-    YAML::Node root2 = YAML::LoadFile("/home/cnzed/Desktop/sylar_cnzed/sylar/bin/conf/test.yml");
-    sylar::Config::LoadFromYaml(root2);
+    YAML::Node root = YAML::LoadFile("/home/sylar/workspace/sylar/bin/conf/test.yml");
+    sylar::Config::LoadFromYaml(root);
 
     SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "after: " << g_person->getValue().toString() << " - " << g_person->toString();
     XX_PM(g_person_map, "class.map after");
@@ -209,7 +206,7 @@ void test_log() {
     static sylar::Logger::ptr system_log = SYLAR_LOG_NAME("system");
     SYLAR_LOG_INFO(system_log) << "hello system" << std::endl;
     std::cout << sylar::LoggerMgr::GetInstance()->toYamlString() << std::endl;
-    YAML::Node root = YAML::LoadFile("/home/cnzed/Desktop/sylar_cnzed/sylar/bin/conf/log.yml");
+    YAML::Node root = YAML::LoadFile("/home/sylar/workspace/sylar/bin/conf/log.yml");
     sylar::Config::LoadFromYaml(root);
     std::cout << "=============" << std::endl;
     std::cout << sylar::LoggerMgr::GetInstance()->toYamlString() << std::endl;
@@ -224,7 +221,15 @@ void test_log() {
 int main(int argc, char** argv) {
     //test_yaml();
     //test_config();
-    // test_class();
+    //test_class();
     test_log();
+
+    sylar::Config::Visit([](sylar::ConfigVarBase::ptr var) {
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "name=" << var->getName()
+                    << " description=" << var->getDescription()
+                    << " typename=" << var->getTypeName()
+                    << " value=" << var->toString();
+    });
+
     return 0;
 }

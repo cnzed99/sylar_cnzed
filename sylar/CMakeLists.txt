@@ -66,6 +66,10 @@ add_executable(test_thread tests/test_thread.cc)
 add_dependencies(test_thread sylar_cnzed)
 target_link_libraries(test_thread ${LIBS})
 
+add_executable(test_util tests/test_util.cc)
+add_dependencies(test_util sylar_cnzed)
+target_link_libraries(test_util ${LIBS})
+
 
 # 设置所有可执行文件的输出路径
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
