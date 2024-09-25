@@ -7,7 +7,7 @@ project(sylar_cnzed)
 # 打开详细的makefile输出
 set(CMAKE_VERBOSE_MAKEFILE ON)
 # 设置C++编译标志，包括从环境变量继承的标志，以及其他编译选项
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined")
 
 # 包含当前目录下的头文件
 include_directories(.)
@@ -17,12 +17,6 @@ include_directories(/apps/bread/include)
 
 # 链接指定路径下的库文件
 link_directories(/apps/bread/lib)
-
-# 查找yaml-cpp库并将结果存储在YAMLCPP变量中
-find_library(YAML_CPP yaml-cpp)
-find_library(PTHREAD pthread)
-# 输出找到的yaml-cpp库路径
-message("*** ${YAMLCPP}")
 
 # 定义库的源文件列表
 set(LIB_SRC
@@ -35,6 +29,12 @@ set(LIB_SRC
 # 创建共享库sylar，包含上面定义的源文件
 add_library(sylar_cnzed SHARED ${LIB_SRC})
 
+# 查找yaml-cpp库并将结果存储在YAMLCPP变量中
+find_library(YAML_CPP yaml-cpp)
+find_library(PTHREAD pthread)
+# 输出找到的yaml-cpp库路径
+message("*** ${YAMLCPP}")
+
 set(LIBS
         sylar_cnzed
         pthread
@@ -45,18 +45,18 @@ message("***", ${LIBS})
 # 创建可执行文件test，源文件为tests/test.cc
 add_executable(test tests/test.cc)
 
-# 设置test依赖于sylar库
+# 设置test依赖于sylar_cnzed库
 add_dependencies(test sylar_cnzed)
 
 add_executable(test_config tests/test_config.cc)
 add_dependencies(test_config sylar_cnzed)
-# 链接test_config可执行文件与sylar库和yaml-cpp库
+# 链接test_config可执行文件与sylar_cnzed库和yaml-cpp库
 target_link_libraries(test_config sylar_cnzed ${LIBS})
 
 # 创建可执行文件testlog，源文件为tests/teslog.cc
 add_executable(testlog tests/testlog.cc)
 
-# 设置testlog依赖于sylar库
+# 设置testlog依赖于sylar_cnzed库
 add_dependencies(testlog sylar_cnzed)
 
 # 链接testlog可执行文件与sylar库和yaml-cpp库
