@@ -20,10 +20,12 @@ link_directories(/apps/bread/lib)
 
 # 定义库的源文件列表
 set(LIB_SRC
-    sylar/log.cc
-    sylar/util.cc
     sylar/config.cc
+    sylar/fiber.cc
+    sylar/log.cc
+    sylar/scheduler.cc
     sylar/thread.cc
+    sylar/util.cc
 )
 
 # 创建共享库sylar，包含上面定义的源文件
@@ -70,6 +72,13 @@ add_executable(test_util tests/test_util.cc)
 add_dependencies(test_util sylar_cnzed)
 target_link_libraries(test_util ${LIBS})
 
+add_executable(test_fiber tests/test_fiber.cc)
+add_dependencies(test_fiber sylar_cnzed)
+target_link_libraries(test_fiber ${LIBS})
+
+add_executable(test_scheduler tests/test_scheduler.cc)
+add_dependencies(test_scheduler sylar_cnzed)
+target_link_libraries(test_scheduler ${LIBS})
 
 # 设置所有可执行文件的输出路径
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
