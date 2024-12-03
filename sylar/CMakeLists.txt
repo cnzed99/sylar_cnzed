@@ -22,6 +22,7 @@ link_directories(/apps/bread/lib)
 set(LIB_SRC
     sylar/config.cc
     sylar/fiber.cc
+    sylar/iomanager.cc
     sylar/log.cc
     sylar/scheduler.cc
     sylar/thread.cc
@@ -79,6 +80,10 @@ target_link_libraries(test_fiber ${LIBS})
 add_executable(test_scheduler tests/test_scheduler.cc)
 add_dependencies(test_scheduler sylar_cnzed)
 target_link_libraries(test_scheduler ${LIBS})
+
+add_executable(test_iomanager tests/test_iomanager.cc)
+add_dependencies(test_iomanager sylar_cnzed)
+target_link_libraries(test_iomanager ${LIBS})
 
 # 设置所有可执行文件的输出路径
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
