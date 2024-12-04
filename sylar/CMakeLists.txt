@@ -20,8 +20,11 @@ link_directories(/apps/bread/lib)
 
 # 定义库的源文件列表
 set(LIB_SRC
+    sylar/address.cc
     sylar/config.cc
+    sylar/fd_manager.cc
     sylar/fiber.cc
+    sylar/hook.cc
     sylar/iomanager.cc
     sylar/log.cc
     sylar/scheduler.cc
@@ -41,6 +44,7 @@ message("*** ${YAMLCPP}")
 
 set(LIBS
         sylar_cnzed
+        dl
         pthread
         yaml-cpp)
         
@@ -85,6 +89,14 @@ target_link_libraries(test_scheduler ${LIBS})
 add_executable(test_iomanager tests/test_iomanager.cc)
 add_dependencies(test_iomanager sylar_cnzed)
 target_link_libraries(test_iomanager ${LIBS})
+
+add_executable(test_hook tests/test_hook.cc)
+add_dependencies(test_hook sylar_cnzed)
+target_link_libraries(test_hook ${LIBS})
+
+add_executable(test_address tests/test_address.cc)
+add_dependencies(test_address sylar_cnzed)
+target_link_libraries(test_address ${LIBS})
 
 # 设置所有可执行文件的输出路径
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
